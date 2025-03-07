@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generar Tirilla de Combustible</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo img {
+            max-width: 200px; /* Tamaño del logo en la página principal */
+            height: auto;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #444;
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-size: 14px;
+            color: #555;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        input:focus {
+            border-color: #007BFF;
+            outline: none;
+        }
+        button {
+            width: 100%;
+            margin-top: 20px;
+            padding: 12px;
+            background-color: #007BFF; /* Azul */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3; /* Azul más oscuro al pasar el mouse */
+        }
+        /* Estilos para la vista de impresión */
+        @media print {
+            .no-print {
+                display: none; /* Oculta elementos que no deben imprimirse */
+            }
+            body {
+                margin: 0; /* Eliminar márgenes del cuerpo */
+                padding: 0; /* Eliminar padding del cuerpo */
+            }
+            .tirilla {
+                font-family: Arial, sans-serif;
+                padding: 0; /* Eliminar padding */
+                margin: 0; /* Eliminar márgenes */
+                max-width: 100%;
+                text-align: center;
+            }
+            .logo-impresion img {
+                max-width: 150px; /* Tamaño del logo en la impresión */
+                height: auto;
+                margin: 0 0 5px 0; /* Reducir margen inferior del logo */
+            }
+            .titulo {
+                font-size: 20px;
+                font-weight: bold;
+                text-transform: uppercase;
+                margin: 0; /* Eliminar márgenes */
+            }
+            .tirilla h2, .tirilla p {
+                margin: 2px 0; /* Reducir márgenes internos */
+            }
+            .tirilla hr {
+                margin: 5px 0; /* Reducir margen del hr */
+            }
+            .firma {
+                margin-top: 30px; /* Aumentar margen superior para la firma */
+                padding-top: 20px; /* Aumentar padding superior para la firma */
+                border-top: 1px solid #000;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container no-print">
+        <!-- Logo de la empresa -->
+        <div class="logo">
+            <img src="logo.png" alt="Logo de Comercial Emanuel"> <!-- Cambia "logo.png" por la ruta de tu imagen -->
+        </div>
+        <h1>Generar Tirilla de Combustible</h1>
+        <form onsubmit="return generarTirilla()">
+            <label for="fecha">Fecha:</label>
+            <input type="date" id="fecha" placeholder="Ingrese la fecha" required>
+
+            <label for="nombre">Nombre:</label>
+            <input type="text" id="nombre" placeholder="Ingrese el nombre" required>
+
+            <label for="vehiculo">Vehículo:</label>
+            <input type="text" id="vehiculo" placeholder="Ingrese el vehículo" required>
+
+            <label for="placa">Placa:</label>
+            <input type="text" id="placa" placeholder="Ingrese la placa" required>
+
+            <label for="kilometraje">Kilometraje:</label>
+            <input type="text" id="kilometraje" placeholder="Ingrese el kilometraje">
+
+            <button type="submit">Generar Tirilla</button>
+        </form>
+    </div>
+
+    <script>
+        let numeroOrden = 0;
+        let registros = []; // Array para almacenar los registros
+
+        function generarTirilla() {
+            // Validar el formulario
+            const nombre = document.getElementById('nombre').value;
+            const vehiculo = document.getElementById('vehiculo').value;
+            const placa = document.getElementById('placa').value;
+            const kilometraje = document.getElementById('kilometraje').value;
+            const fechaInput = document.getElementById('fecha').value;
+
+            if (!nombre || !vehiculo || !placa || !fechaInput) {
+                alert("Por favor, complete todos los campos obligatorios: Fecha, Nombre, Vehículo y Placa.");
+                return false; // Evita que el formulario se envíe
+            }
+
+            // Incrementar el número de orden
+            numeroOrden++;
+
+            // Obtener la fecha en formato local
+            const fecha = new Date(fechaInput).toLocaleDateString();
+
+            // Crear el contenido de la tirilla
+            const contenidoTirilla = `
+                <div class="tirilla">
+                    <div class="logo-impresion">
+                        <img src="logo.png" alt="Logo de Comercial Emanuel"> <!-- Logo en el documento impreso -->
+                    </div>
+                    <div class="titulo">ORDEN DE COMBUSTIBLE</div>
+                    <h2>Ferreteria Emanuel</h2>
+                    <p>R.T.N 15019021280936</p>
+                    <hr>
+                    <p><strong>N° de Orden:</strong> ${numeroOrden}</p>
+                    <p><strong>Fecha:</strong> ${fecha}</p>
+                    <p><strong>Nombre:</strong> ${nombre}</p>
+                    <p><strong>Vehículo:</strong> ${vehiculo}</p>
+                    <p><strong>Placa:</strong> ${placa}</p>
+                    ${kilometraje ? `<p><strong>Kilometraje:</strong> ${kilometraje}</p>` : ''}
+                    <div class="firma">Firma autorizada</div>
+                </div>
+            `;
+
+            // Abrir una nueva ventana para imprimir
+            const ventanaImpresion = window.open('', '_blank');
+            ventanaImpresion.document.write(`
+                <html>
+                    <head>
+                        <title>Tirilla de Combustible</title>
+                        <style>
+                            body {
+                                font-family: Arial, sans-serif;
+                                text-align: center;
+                                margin: 0; /* Sin márgenes */
+                                padding: 0; /* Sin padding */
+                            }
+                            .tirilla {
+                                max-width: 100%;
+                                text-align: center;
+                                padding: 0; /* Sin padding */
+                                margin: 0; /* Sin márgenes */
+                            }
+                            .logo-impresion img {
+                                max-width: 150px; /* Tamaño del logo en la impresión */
+                                height: auto;
+                                margin: 0 0 5px 0; /* Reducir margen inferior del logo */
+                            }
+                            .titulo {
+                                font-size: 20px;
+                                font-weight: bold;
+                                text-transform: uppercase;
+                                margin: 0; /* Sin márgenes */
+                            }
+                            .tirilla h2, .tirilla p {
+                                margin: 2px 0; /* Márgenes reducidos */
+                            }
+                            .tirilla hr {
+                                margin: 5px 0; /* Márgenes reducidos */
+                            }
+                            .firma {
+                                margin-top: 30px; /* Aumentar margen superior para la firma */
+                                padding-top: 20px; /* Aumentar padding superior para la firma */
+                                border-top: 1px solid #000;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        ${contenidoTirilla}
+                        <script>
+                            window.onload = function() {
+                                window.print();
+                                window.onafterprint = function() {
+                                    window.close();
+                                };
+                            };
+                        <\/script>
+                    </body>
+                </html>
+            `);
+            ventanaImpresion.document.close();
+
+            // Guardar el registro en el array
+            const registro = {
+                numeroOrden: numeroOrden,
+                fecha: fecha,
+                nombre: nombre,
+                vehiculo: vehiculo,
+                placa: placa,
+                kilometraje: kilometraje || "N/A" // Si no hay kilometraje, se guarda "N/A"
+            };
+            registros.push(registro);
+
+            // Generar el archivo Excel
+            generarExcel();
+
+            return false; // Evita que el formulario se envíe
+        }
+
+        function generarExcel() {
+            // Crear una hoja de trabajo
+            const wsData = [
+                ["N° de Orden", "Fecha", "Nombre", "Vehículo", "Placa", "Kilometraje"], // Encabezados
+                ...registros.map(reg => [reg.numeroOrden, reg.fecha, reg.nombre, reg.vehiculo, reg.placa, reg.kilometraje]) // Datos
+            ];
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+            // Crear un libro de trabajo y agregar la hoja
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Registros");
+
+            // Guardar el archivo Excel
+            XLSX.writeFile(wb, "registros_tirillas.xlsx");
+        }
+    </script>
+</body>
+</html>
