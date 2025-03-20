@@ -77,15 +77,15 @@
                 display: none; /* Oculta elementos que no deben imprimirse */
             }
             body {
+                font-family: Arial, sans-serif;
                 margin: 0; /* Eliminar márgenes del cuerpo */
                 padding: 0; /* Eliminar padding del cuerpo */
             }
             .tirilla {
-                font-family: Arial, sans-serif;
-                padding: 0; /* Eliminar padding */
-                margin: 0; /* Eliminar márgenes */
                 max-width: 100%;
                 text-align: center;
+                padding: 0; /* Sin padding */
+                margin: 0; /* Sin márgenes */
             }
             .logo-impresion img {
                 max-width: 150px; /* Tamaño del logo en la impresión */
@@ -96,13 +96,14 @@
                 font-size: 20px;
                 font-weight: bold;
                 text-transform: uppercase;
-                margin: 0; /* Eliminar márgenes */
+                margin: 0; /* Sin márgenes */
             }
             .tirilla h2, .tirilla p {
-                margin: 2px 0; /* Reducir márgenes internos */
+                margin: 2px 0; /* Márgenes reducidos */
+                font-family: Arial, sans-serif;
             }
             .tirilla hr {
-                margin: 5px 0; /* Reducir margen del hr */
+                margin: 5px 0; /* Márgenes reducidos */
             }
             .firma {
                 margin-top: 30px; /* Aumentar margen superior para la firma */
@@ -140,9 +141,9 @@
     </div>
 
     <script>
-        // Obtener el número de orden desde localStorage o inicializarlo en 1
+        // Obtener el número de orden y los registros desde localStorage
         let numeroOrden = localStorage.getItem('numeroOrden') ? parseInt(localStorage.getItem('numeroOrden')) : 1;
-        let registros = []; // Array para almacenar los registros
+        let registros = JSON.parse(localStorage.getItem('registros')) || []; // Recuperar registros anteriores
 
         function generarTirilla() {
             // Validar el formulario
@@ -212,6 +213,7 @@
                             }
                             .tirilla h2, .tirilla p {
                                 margin: 2px 0; /* Márgenes reducidos */
+                                font-family: Arial, sans-serif;
                             }
                             .tirilla hr {
                                 margin: 5px 0; /* Márgenes reducidos */
@@ -253,7 +255,10 @@
             numeroOrden++;
             localStorage.setItem('numeroOrden', numeroOrden);
 
-            // Generar el archivo Excel
+            // Guardar los registros en localStorage
+            localStorage.setItem('registros', JSON.stringify(registros));
+
+            // Generar el archivo Excel con todos los registros
             generarExcel();
 
             return false; // Evita que el formulario se envíe
